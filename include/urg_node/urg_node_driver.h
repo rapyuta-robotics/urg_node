@@ -122,6 +122,7 @@ private:
   bool synchronize_time_;
   bool publish_intensity_;
   bool publish_multiecho_;
+  bool no_range_as_inf;
   int error_limit_;
   double diagnostics_tolerance_;
   double diagnostics_window_time_;
