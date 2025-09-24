@@ -78,7 +78,7 @@ void UrgNode::initSetup()
   pnh_.param<bool>("synchronize_time", synchronize_time_, false);
   pnh_.param<bool>("publish_intensity", publish_intensity_, true);
   pnh_.param<bool>("publish_multiecho", publish_multiecho_, false);
-  pnh.param<bool>("no_range_as_inf", no_range_as_inf, true);
+  pnh_.param<bool>("no_range_as_inf", no_range_as_inf, true);
   pnh_.param<int>("error_limit", error_limit_, 4);
   pnh_.param<double>("diagnostics_tolerance", diagnostics_tolerance_, 0.05);
   pnh_.param<double>("diagnostics_window_time", diagnostics_window_time_, 5.0);
