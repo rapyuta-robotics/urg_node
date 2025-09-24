@@ -89,12 +89,11 @@ public:
 class URGCWrapper
 {
 public:
-  // In urg_c_wrapper.h (add back original overloads)
   URGCWrapper(const std::string& ip, int port, bool& u_int, bool& u_me, bool sync)
-    : URGCWrapper(ip, port, u_int, u_me, sync, /*no_range_as_inf=*/false) {}
+    : URGCWrapper(ip, port, u_int, u_me, sync, BoolRef::False()) {}
 
   URGCWrapper(int baud, const std::string& port, bool& u_int, bool& u_me, bool sync)
-    : URGCWrapper(baud, port, u_int, u_me, sync, /*no_range_as_inf=*/false) {}
+    : URGCWrapper(baud, port, u_int, u_me, sync, BoolRef::False()) {}
 
   URGCWrapper(const std::string& ip_address, const int ip_port,
       bool& using_intensity, bool& using_multiecho, bool synchronize_time, bool &no_range_as_inf);
@@ -186,6 +185,18 @@ private:
   ros::Duration getNativeClockOffset(size_t num_measurements);
 
   ros::Duration getTimeStampOffset(size_t num_measurements);
+
+  struct BoolRef {
+    static bool& False() {
+      static bool val = false;
+      return val;
+    }
+
+    static bool& True() {
+      static bool val = true;
+      return val;
+    }
+  };
 
   /**
    * @brief Get synchronized time stamp using hardware clock
