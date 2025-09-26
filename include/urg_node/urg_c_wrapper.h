@@ -89,11 +89,12 @@ public:
 class URGCWrapper
 {
 public:
+  // Default to "no range as +inf" for the simple overloads
   URGCWrapper(const std::string& ip, int port, bool& u_int, bool& u_me, bool sync)
-    : URGCWrapper(ip, port, u_int, u_me, sync, BoolRef::False()) {}
+    : URGCWrapper(ip, port, u_int, u_me, sync, BoolRef::True()) {}
 
   URGCWrapper(int baud, const std::string& port, bool& u_int, bool& u_me, bool sync)
-    : URGCWrapper(baud, port, u_int, u_me, sync, BoolRef::False()) {}
+    : URGCWrapper(baud, port, u_int, u_me, sync, BoolRef::True()) {}
 
   URGCWrapper(const std::string& ip_address, const int ip_port,
       bool& using_intensity, bool& using_multiecho, bool synchronize_time, bool &no_range_as_inf);
@@ -191,7 +192,6 @@ private:
       static bool val = false;
       return val;
     }
-
     static bool& True() {
       static bool val = true;
       return val;

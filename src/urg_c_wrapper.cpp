@@ -37,9 +37,27 @@
 #include <string>
 #include <vector>
 #include <boost/crc.hpp>
-
+#include <cmath>
+#include <cerrno>
+#include <cstring>
+#include <boost/shared_array.hpp>
 namespace urg_node
 {
+	
+namespace {
+  // Treat 0 and ~65535mm as "no return"
+  constexpr long HOKUYO_INVALID_MM_THRESH = 65500;
+  inline bool isInvalidRaw(long raw_mm) {
+    return (raw_mm == 0) || (raw_mm >= HOKUYO_INVALID_MM_THRESH);
+  }
+  inline bool isOutOfSpec(float r_m, float rmin, float rmax) {
+    return std::isnan(r_m) || (r_m < rmin) || (r_m > rmax);
+  }
+  inline float noReturnValue(bool no_range_as_inf) {
+    return no_range_as_inf ? std::numeric_limits<float>::infinity()
+                           : std::numeric_limits<float>::quiet_NaN();
+  }
+}
 
 URGCWrapper::URGCWrapper(const std::string& ip_address, const int ip_port,
     bool& using_intensity, bool& using_multiecho, bool synchronize_time, bool &no_range_as_inf)
@@ -248,24 +266,22 @@ bool URGCWrapper::grabScan(const sensor_msgs::LaserScanPtr& msg)
     msg->intensities.resize(num_beams);
   }
 
-  for (int i = 0; i < num_beams; i++)
-  {
-    if (data_[(i) + 0] != 0)
-    {
-      msg->ranges[i] = static_cast<float>(data_[i]) / 1000.0;
-      if (use_intensity_)
-      {
-        msg->intensities[i] = intensity_[i];
-      }
+  const float rmin = static_cast<float>(msg->range_min);
+  const float rmax = static_cast<float>(msg->range_max);
+  for (int i = 0; i < num_beams; i++) {
+    long raw_mm = data_[i];
+    if (isInvalidRaw(raw_mm)) {
+      msg->ranges[i] = noReturnValue(no_range_as_inf_);
+      if (use_intensity_) msg->intensities[i] = 0.0f;
+      continue;
     }
-    else
-    {
-      if(no_range_as_inf_){
-        msg->ranges[i] = std::numeric_limits<float>::infinity();
-      }
-      else{
-        msg->ranges[i] = std::numeric_limits<float>::quiet_NaN();
-      }
+    float r = static_cast<float>(raw_mm) / 1000.0f;
+    if (isOutOfSpec(r, rmin, rmax)) {
+      msg->ranges[i] = noReturnValue(no_range_as_inf_);
+      if (use_intensity_) msg->intensities[i] = 0.0f;
+    } else {
+      msg->ranges[i] = r;
+      if (use_intensity_) msg->intensities[i] = intensity_[i];
     }
   }
   return true;
@@ -309,8 +325,9 @@ bool URGCWrapper::grabScan(const sensor_msgs::MultiEchoLaserScanPtr& msg)
     msg->intensities.reserve(num_beams);
   }
 
-  for (size_t i = 0; i < num_beams; i++)
-  {
+  const float rmin = static_cast<float>(msg->range_min);
+  const float rmax = static_cast<float>(msg->range_max);
+  for (int i = 0; i < num_beams; i++) {
     sensor_msgs::LaserEcho range_echo;
     range_echo.echoes.reserve(URG_MAX_ECHO);
     sensor_msgs::LaserEcho intensity_echo;
@@ -318,20 +335,23 @@ bool URGCWrapper::grabScan(const sensor_msgs::MultiEchoLaserScanPtr& msg)
     {
       intensity_echo.echoes.reserve(URG_MAX_ECHO);
     }
-    for (size_t j = 0; j < URG_MAX_ECHO; j++)
-    {
-      if (data_[(URG_MAX_ECHO * i) + j] != 0)
-      {
-        range_echo.echoes.push_back(static_cast<float>(data_[(URG_MAX_ECHO * i) + j]) / 1000.0f);
-        if (use_intensity_)
-        {
-          intensity_echo.echoes.push_back(intensity_[(URG_MAX_ECHO * i) + j]);
-        }
-      }
-      else
-      {
-        break;
-      }
+    bool any_valid = false;
+    for (size_t j = 0; j < URG_MAX_ECHO; j++) {
+      long raw_mm = data_[(URG_MAX_ECHO * i) + j];
+      // URG pads remaining echoes with 0: stop at first 0
+      if (raw_mm == 0) break;
+      if (isInvalidRaw(raw_mm)) continue;
+      float r = static_cast<float>(raw_mm) / 1000.0f;
+      if (isOutOfSpec(r, rmin, rmax)) continue;
+      range_echo.echoes.push_back(r);
+      if (use_intensity_)
+        intensity_echo.echoes.push_back(intensity_[(URG_MAX_ECHO * i) + j]);
+      any_valid = true;
+    }
+    // If no valid echo for this beam, emit a single INF/NaN echo.
+    if (!any_valid) {
+      range_echo.echoes.push_back(noReturnValue(no_range_as_inf_));
+      if (use_intensity_) intensity_echo.echoes.push_back(0.0f);
     }
     msg->ranges.push_back(range_echo);
     if (use_intensity_)
