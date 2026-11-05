@@ -62,6 +62,7 @@ UrgNode::UrgNode(const rclcpp::NodeOptions & node_options)
   calibrate_time_(false),
   publish_intensity_(false),
   publish_multiecho_(false),
+  no_range_as_inf_(false),
   diagnostics_tolerance_(0.05),
   diagnostics_window_time_(5.0),
   detailed_status_(false),
@@ -88,6 +89,7 @@ void UrgNode::initSetup()
   calibrate_time_ = this->declare_parameter<bool>("calibrate_time", calibrate_time_);
   publish_intensity_ = this->declare_parameter<bool>("publish_intensity", publish_intensity_);
   publish_multiecho_ = this->declare_parameter<bool>("publish_multiecho", publish_multiecho_);
+  no_range_as_inf_ = this->declare_parameter<bool>("no_range_as_inf", no_range_as_inf_);
   error_limit_ = this->declare_parameter<int>("error_limit", error_limit_);
   diagnostics_tolerance_ = this->declare_parameter<double>(
     "diagnostics_tolerance",
@@ -431,6 +433,7 @@ bool UrgNode::connect()
           connection,
           publish_intensity_, publish_multiecho_, this->get_logger()));
     }
+    urg_->setNoRangeAsInf(no_range_as_inf_);
 
     std::stringstream ss;
     ss << "Connected to";

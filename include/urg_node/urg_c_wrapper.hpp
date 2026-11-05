@@ -123,6 +123,9 @@ public:
 
   bool isStarted() const;
 
+  /// Report beams without a valid return as +inf instead of NaN.
+  void setNoRangeAsInf(bool no_range_as_inf);
+
   double getRangeMin() const;
 
   double getRangeMax() const;
@@ -240,6 +243,7 @@ private:
 
   bool use_intensity_;
   bool use_multiecho_;
+  bool no_range_as_inf_{false};
   urg_measurement_type_t measurement_type_;
   int first_step_;
   int last_step_;
