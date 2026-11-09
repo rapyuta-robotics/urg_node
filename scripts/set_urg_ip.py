@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Copyright (c) 2014 Unbounded Robotics Inc.
 # All right reserved.
@@ -26,68 +26,58 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-"""
-Change the IP address of a Hokuyo URG Laser
-"""
+"""Change the IP address of a Hokuyo URG Laser."""
 
 import argparse
 import socket
 
+
 def parse_and_validate_ipv4(argument, name):
-    """
-    Each address must have 4
-    """
-    if len(argument.split(".")) != 4:
-        print("Invalid %s, must be of the form xxx.yyy.zzz.www" % name)
+    """Each address must have 4."""
+    if len(argument.split('.')) != 4:
+        print('Invalid %s, must be of the form xxx.yyy.zzz.www' % name)
         exit(-1)
-    parsed = ""
-    for x in argument.split("."):
+    parsed = ''
+    for x in argument.split('.'):
         if len(x) > 3:
-            print("Invalid %s, must be of the form xxx.yyy.zzz.www" % name)
+            print('Invalid %s, must be of the form xxx.yyy.zzz.www' % name)
             exit(-1)
         while len(x) < 3:
-            x = "0" + x
+            x = '0' + x
         parsed += x
     return parsed
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('new_ip', help='The desired IP address for the laser')
     parser.add_argument('new_gw', help='The desired gateway for the laser')
-    parser.add_argument('--nm', help='The desired netmask for the laser', default="255.255.255.0")
-    parser.add_argument('--ip', help='The current IP address of the laser', default="192.168.0.10")
+    parser.add_argument('--nm', help='The desired netmask for the laser', default='255.255.255.0')
+    parser.add_argument('--ip', help='The current IP address of the laser', default='192.168.0.10')
     args = parser.parse_args()
 
     # Packet starts with $IP, ends with \x0a, contains:
     #   12 character IP
     #   12 character netmask
     #   12 character gateway
-    ip = parse_and_validate_ipv4(args.new_ip, "IP address")
-    gw = parse_and_validate_ipv4(args.new_gw, "gateway address")
-    nm = parse_and_validate_ipv4(args.nm, "netmask")
-    msg = "$IP" + ip + nm + gw + "\x0a"
+    ip = parse_and_validate_ipv4(args.new_ip, 'IP address')
+    gw = parse_and_validate_ipv4(args.new_gw, 'gateway address')
+    nm = parse_and_validate_ipv4(args.nm, 'netmask')
+    msg = '$IP' + ip + nm + gw + '\x0a'
 
-    print("Connecting to %s" % args.ip)
+    print('Connecting to %s' % args.ip)
     sock = socket.socket()
     sock.connect((args.ip, 10940))
 
-    print("Updating settings")
-    # Make sure to convert msg from str to bytes; required for Python3.
-    # Still backwards compatible with Python2.
-    sock.send(msg.encode('utf-8'))
-
+    print('Updating settings')
+    sock.send(msg)
     try:
         sock.settimeout(5)
-        # Socket returns bytes in Python3 and str in Python2.
         returned = sock.recv(40)
     except socket.timeout:
-        print("Laser did not return any packet, is probably not updated.")
+        print('Laser did not return any packet, is probably not updated.')
         exit(-1)
-
-    # Make sure to compare bytes to bytes in Python3,
-    # and str to str in Python2.
-    if msg.encode('utf-8') != returned:
-        print("Laser does not appear to have updated")
+    if msg != returned:
+        print('Laser does not appear to have updated')
         exit(-1)
-
-    print("Done updating, cycle power on laser")
+    print('Done updating, cycle power on laser')
