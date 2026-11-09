@@ -1,0 +1,11 @@
+# Hokuyo mounts relative to base_link, from rr_pa_amr_description/description/<gen>/<version>/config.yaml.
+# Only the robots with two Hokuyos. x, y, z [m]; roll, pitch, yaw [deg].
+gen2/v4:
+  scan_front_link: {x: 0.267, y: 0.0, z: -0.015, roll: 180.0, pitch: 0.0, yaw: 0.0}
+  scan_rear_link: {x: -0.105, y: 0.0, z: 0.353, roll: 0.0, pitch: 0.0, yaw: 180.0}
+gen3/v1:
+  scan_front_link: {x: 0.2775, y: 0.0, z: -0.024, roll: 180.0, pitch: 0.0, yaw: 0.0}
+  scan_rear_link: {x: -0.122, y: 0.0, z: 0.2694, roll: 0.0, pitch: 0.0, yaw: 180.0}
+gen3/v1_xl:
+  scan_front_link: {x: 0.2775, y: 0.0, z: -0.024, roll: 180.0, pitch: 0.0, yaw: 0.0}
+  scan_rear_link: {x: -0.122, y: 0.0, z: 0.2694, roll: 0.0, pitch: 0.0, yaw: 180.0}
