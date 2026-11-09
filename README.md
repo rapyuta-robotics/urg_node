@@ -60,6 +60,7 @@ urg_node:
     angle_min: -3.14
     publish_intensity: false
     publish_multiecho: false
+    no_range_as_inf: false
     calibrate_time: false
     default_user_latency: 0
     diagnostics_tolerance: 0.05
@@ -69,6 +70,11 @@ urg_node:
     cluster: 0
     skip: 1
 ```
+
+`no_range_as_inf` (Rapyuta addition, default `false`): when `true`, beams without a valid return
+(raw 0, raw >= 65500 mm, or a range outside `[range_min, range_max]`) are published as `+inf`
+with intensity 0, and a multiecho beam with no valid echo gets a single `+inf` echo.
+When `false`, the upstream behavior is kept (raw 0 is published as NaN).
 
 To give parameters to urg_node :
 

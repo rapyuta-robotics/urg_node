@@ -1,0 +1,82 @@
+Panels:
+- Class: rviz_common/Displays
+  Name: Displays
+  Property Tree Widget:
+    Expanded: null
+  Splitter Ratio: 0.55
+- Class: rviz_common/Views
+  Name: Views
+Visualization Manager:
+  Class: ''
+  Displays:
+  - Class: rviz_default_plugins/Grid
+    Name: Grid (1 m)
+    Enabled: true
+    Cell Size: 1
+    Plane Cell Count: 30
+    Color: 160; 160; 164
+    Alpha: 0.4
+    Reference Frame: <Fixed Frame>
+  - Class: rviz_default_plugins/TF
+    Name: TF
+    Enabled: true
+    Show Names: true
+    Show Axes: true
+    Show Arrows: false
+    Marker Scale: 0.4
+    Frame Timeout: 15
+  - Class: rviz_default_plugins/LaserScan
+    Name: Front Hokuyo (raw_scan_front)
+    Enabled: true
+    Topic:
+      Value: /raw_scan_front
+      Reliability Policy: Best Effort
+      Durability Policy: Volatile
+      History Policy: Keep Last
+      Depth: 5
+    Style: Points
+    Size (Pixels): 3
+    Color Transformer: Intensity
+    Color: 225; 26; 39
+    Alpha: 1
+    Decay Time: 0
+    Use rainbow: true
+  - Class: rviz_default_plugins/LaserScan
+    Name: Rear lidar (raw_scan_rear)
+    Enabled: true
+    Topic:
+      Value: /raw_scan_rear
+      Reliability Policy: Best Effort
+      Durability Policy: Volatile
+      History Policy: Keep Last
+      Depth: 5
+    Style: Points
+    Size (Pixels): 3
+    Color Transformer: Intensity
+    Color: 242; 80; 26
+    Alpha: 1
+    Decay Time: 0
+    Use rainbow: true
+  Enabled: true
+  Global Options:
+    Background Color: 40; 40; 40
+    Fixed Frame: base_link
+    Frame Rate: 30
+  Name: root
+  Tools:
+  - Class: rviz_default_plugins/MoveCamera
+  - Class: rviz_default_plugins/Measure
+  - Class: rviz_default_plugins/SetInitialPose
+  - Class: rviz_default_plugins/PublishPoint
+  Views:
+    Current:
+      Class: rviz_default_plugins/TopDownOrtho
+      Name: Current View
+      Scale: 60
+      X: 0
+      Y: 0
+      Angle: 0
+      Target Frame: base_link
+Window Geometry:
+  Width: 1400
+  Height: 900

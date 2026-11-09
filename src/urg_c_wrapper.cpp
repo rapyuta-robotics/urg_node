@@ -34,6 +34,7 @@
 #include <urg_node/urg_c_wrapper.hpp>
 
 #include <chrono>
+#include <cmath>
 #include <cinttypes>
 #include <limits>
 #include <memory>
@@ -41,6 +42,7 @@
 #include <vector>
 
 #include "boost/crc.hpp"
+#include "urg_node/no_return_as_inf.hpp"
 
 namespace urg_node
 {
@@ -239,6 +241,13 @@ bool URGCWrapper::grabScan(sensor_msgs::msg::LaserScan & msg)
   }
 
   for (int i = 0; i < num_beams; i++) {
+    if (no_range_as_inf_) {
+      msg.ranges[i] = rawRangeOrInf(data_[i], msg.range_min, msg.range_max);
+      if (use_intensity_) {
+        msg.intensities[i] = std::isinf(msg.ranges[i]) ? 0.0f : intensity_[i];
+      }
+      continue;
+    }
     if (data_[(i) + 0] != 0) {
       msg.ranges[i] = static_cast<float>(data_[i]) / 1000.0;
       if (use_intensity_) {
@@ -297,7 +306,14 @@ bool URGCWrapper::grabScan(sensor_msgs::msg::MultiEchoLaserScan & msg)
     if (use_intensity_) {
       intensity_echo.echoes.reserve(URG_MAX_ECHO);
     }
-    for (size_t j = 0; j < URG_MAX_ECHO; j++) {
+    if (no_range_as_inf_) {
+      fillEchoesNoReturnAsInf(
+        &data_[URG_MAX_ECHO * i],
+        use_intensity_ ? &intensity_[URG_MAX_ECHO * i] : nullptr,
+        URG_MAX_ECHO, msg.range_min, msg.range_max,
+        range_echo.echoes, intensity_echo.echoes);
+    }
+    for (size_t j = 0; !no_range_as_inf_ && j < URG_MAX_ECHO; j++) {
       if (data_[(URG_MAX_ECHO * i) + j] != 0) {
         range_echo.echoes.push_back(static_cast<float>(data_[(URG_MAX_ECHO * i) + j]) / 1000.0f);
         if (use_intensity_) {
@@ -634,6 +650,11 @@ std::string URGCWrapper::sendCommand(std::string cmd)
   }
 
   return result;
+}
+
+void URGCWrapper::setNoRangeAsInf(bool no_range_as_inf)
+{
+  no_range_as_inf_ = no_range_as_inf;
 }
 
 bool URGCWrapper::isStarted() const

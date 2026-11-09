@@ -1,0 +1,23 @@
+# Hokuyo UST (Ethernet). From rr_pa_amr_description/sensors/hokuyo.yaml (ROS 1).
+# laser_frame_id is set by the launch file. no_range_as_inf is overridden by NO_RANGE_AS_INF.
+hokuyo_front:
+  ros__parameters:
+    ip_address: "10.0.0.10"
+    ip_port: 10940
+    angle_min: -1.570796327
+    angle_max: 1.570796327
+    publish_intensity: true
+    publish_multiecho: false
+    no_range_as_inf: true      # Rapyuta patch: no-return beams = +inf (ROS 1 parity, costmap clearing)
+    error_limit: 4
+
+hokuyo_rear:                   # gen3 v1 only
+  ros__parameters:
+    ip_address: "10.0.1.10"
+    ip_port: 10940
+    angle_min: -2.35619449
+    angle_max: 2.35619449
+    publish_intensity: true
+    publish_multiecho: false
+    no_range_as_inf: true
+    error_limit: 4
